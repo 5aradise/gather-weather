@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:17.5
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./sql/schema:/docker-entrypoint-initdb.d
+      - gatherer-data:/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT}:5432
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENV: ${ENV}
+
+      SERVER_PORT: ${SERVER_PORT}
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+
+volumes:
+  gatherer-data:
