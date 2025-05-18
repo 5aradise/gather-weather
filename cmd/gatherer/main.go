@@ -1,20 +1,30 @@
 package main
 
 import (
+	// config
+	"github.com/5aradise/gather-weather/config"
+
+	// handlers
+	weatherHandler "github.com/5aradise/gather-weather/internal/controllers/weather"
+
+	// services
+	weatherService "github.com/5aradise/gather-weather/internal/services/weather"
+
+	// storages
+	"github.com/5aradise/gather-weather/pkg/db/postgres"
+
+	"github.com/bytedance/sonic"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/logger"
+	"github.com/gofiber/fiber/v3/middleware/recover"
+
 	"flag"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/5aradise/gather-weather/config"
-	"github.com/5aradise/gather-weather/pkg/db/postgres"
-	"github.com/bytedance/sonic"
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/logger"
-	"github.com/gofiber/fiber/v3/middleware/recover"
 )
 
 var envPath = flag.String("env", "", "Path to env file")
@@ -52,6 +62,15 @@ func main() {
 		}
 	}()
 
+	// services
+	weatherSrv, err := weatherService.New(cfg.WeatherApiKey, sonic.Unmarshal)
+	if err != nil {
+		log.Fatal("can't init weather service: ", err)
+	}
+
+	// handlers
+	weatherH := weatherHandler.New(weatherSrv)
+
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,
 		JSONDecoder: sonic.Unmarshal,
@@ -63,19 +82,9 @@ func main() {
 	}))
 	app.Use(logger.New())
 
-	app.Get("", func(c fiber.Ctx) error {
-		var tables []string
-		err = db.API().WithContext(c.Context()).Raw(`
-		SELECT tablename
-		FROM pg_catalog.pg_tables
-		WHERE schemaname NOT IN ('pg_catalog', 'information_schema');
-		`).Scan(&tables).Error
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(map[string]any{"error": err.Error()})
-		}
+	api := app.Group("/api")
 
-		return c.Status(fiber.StatusOK).JSON(tables)
-	})
+	weatherH.Init(api)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)

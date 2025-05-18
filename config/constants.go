@@ -7,7 +7,8 @@ import (
 )
 
 var ( // Errors
-	ErrTODO = errors.New("TODO")
+	ErrCityNotFound = errors.New("City not found")
+	ErrTODO         = errors.New("TODO")
 )
 
 type ServiceCode int

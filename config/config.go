@@ -7,9 +7,10 @@ import (
 
 type (
 	Config struct {
-		Env    string `envconfig:"ENV" required:"true"`
-		DB     DB
-		Server Server
+		Env           string `envconfig:"ENV" required:"true"`
+		WeatherApiKey string `envconfig:"WEATHERAPI_KEY" required:"true"`
+		DB            DB
+		Server        Server
 	}
 
 	DB struct {
