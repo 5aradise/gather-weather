@@ -15,7 +15,7 @@ func (h *handler) subscribe(c fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	token, serr := h.srv.RequestSubscription(c.Context(), sub)
+	token, serr := h.sub.RequestSubscription(c.Context(), sub)
 	if !serr.IsZero() {
 		return res.ServiceErr(c, serr)
 	}
@@ -39,7 +39,7 @@ func (h *handler) confirm(c fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	serr := h.srv.ConfirmSubscription(c.Context(), token)
+	serr := h.sub.ConfirmSubscription(c.Context(), token)
 	if !serr.IsZero() {
 		return res.ServiceErr(c, serr)
 	}
@@ -58,7 +58,7 @@ func (h *handler) unsubscribe(c fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	serr := h.srv.Unsubscribe(c.Context(), token)
+	serr := h.sub.Unsubscribe(c.Context(), token)
 	if !serr.IsZero() {
 		return res.ServiceErr(c, serr)
 	}

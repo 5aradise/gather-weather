@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"time"
 
 	"github.com/5aradise/gather-weather/config"
 	model "github.com/5aradise/gather-weather/internal/models"
+	"github.com/5aradise/gather-weather/internal/models/frequency"
 	"github.com/google/uuid"
 )
 
@@ -54,6 +56,21 @@ func (s *service) ConfirmSubscription(ctx context.Context, token uuid.UUID) conf
 		)
 	}
 
+	s.subs.mu.Lock()
+	switch sub.Frequency {
+	case frequency.Hourly:
+		s.subs.hourly[sub.Token] = model.SubShort{
+			Email: sub.Email,
+			City:  sub.City,
+		}
+	case frequency.Daily:
+		s.subs.daily[sub.Token] = model.SubShort{
+			Email: sub.Email,
+			City:  sub.City,
+		}
+	}
+	s.subs.mu.Unlock()
+
 	return config.ServiceError{}
 }
 
@@ -70,5 +87,34 @@ func (s *service) Unsubscribe(ctx context.Context, token uuid.UUID) config.Servi
 		return config.NewUnknownErr(err)
 	}
 
+	s.subs.mu.Lock()
+	delete(s.subs.hourly, token)
+	delete(s.subs.daily, token)
+	s.subs.mu.Unlock()
+
 	return config.ServiceError{}
+}
+
+func (s *service) ListHourlySubscribers() iter.Seq[model.SubShort] {
+	return func(yield func(model.SubShort) bool) {
+		s.subs.mu.Lock()
+		defer s.subs.mu.Unlock()
+		for _, sub := range s.subs.hourly {
+			if !yield(sub) {
+				return
+			}
+		}
+	}
+}
+
+func (s *service) ListDailySubscribers() iter.Seq[model.SubShort] {
+	return func(yield func(model.SubShort) bool) {
+		s.subs.mu.Lock()
+		defer s.subs.mu.Unlock()
+		for _, sub := range s.subs.daily {
+			if !yield(sub) {
+				return
+			}
+		}
+	}
 }

@@ -77,11 +77,14 @@ func main() {
 		log.Fatal("can't init weather service: ", err)
 	}
 	validSrv := validationServ.New(weatherSrv.CheckCity)
-	subSrv := subscriptionService.New(subStor, validSrv)
+	subSrv, err := subscriptionService.New(subStor, validSrv)
+	if err != nil {
+		log.Fatal("can't init subscription service: ", err)
+	}
 
 	// handlers
 	weatherH := weatherHandler.New(weatherSrv)
-	subH := subscriptionHandler.New(subSrv, mailSrv)
+	subH := subscriptionHandler.New(subSrv, mailSrv, weatherSrv)
 
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,
@@ -98,6 +101,8 @@ func main() {
 
 	weatherH.Init(api)
 	subH.Init(api)
+
+	subH.RunMailing()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)

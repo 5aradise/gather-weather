@@ -15,6 +15,17 @@ func (s storage) CreateSubscription(ctx context.Context, body model.Subscription
 	return body, err
 }
 
+func (s storage) ListAllSubscriptions(ctx context.Context) ([]model.Subscription, error) {
+	var subs []model.Subscription
+	err := s.db.WithContext(ctx).
+		Find(&subs).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return subs, nil
+}
+
 func (s storage) CheckSubscriptionByEmail(ctx context.Context, email string) (bool, error) {
 	var token model.Subscription
 	err := s.db.WithContext(ctx).
