@@ -10,6 +10,7 @@ import (
 	subscriptionStorage "github.com/5aradise/gather-weather/internal/storages/subscription"
 
 	// services
+	mailService "github.com/5aradise/gather-weather/internal/services/mailer"
 	subscriptionService "github.com/5aradise/gather-weather/internal/services/subscriber"
 	validationServ "github.com/5aradise/gather-weather/internal/services/validator"
 	weatherService "github.com/5aradise/gather-weather/internal/services/weather"
@@ -70,6 +71,7 @@ func main() {
 	subStor := subscriptionStorage.New(db.API())
 
 	// services
+	mailSrv := mailService.New(cfg.Mail.Host, cfg.Mail.Port, cfg.Mail.Sender, cfg.Mail.Password)
 	weatherSrv, err := weatherService.New(cfg.WeatherApiKey, sonic.Unmarshal)
 	if err != nil {
 		log.Fatal("can't init weather service: ", err)
@@ -79,7 +81,7 @@ func main() {
 
 	// handlers
 	weatherH := weatherHandler.New(weatherSrv)
-	subH := subscriptionHandler.New(subSrv)
+	subH := subscriptionHandler.New(subSrv, mailSrv)
 
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,

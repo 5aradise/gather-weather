@@ -11,7 +11,8 @@ import (
 
 type (
 	handler struct {
-		srv subscriber
+		srv  subscriber
+		mail mailer
 	}
 
 	subscriber interface {
@@ -19,10 +20,14 @@ type (
 		ConfirmSubscription(ctx context.Context, token uuid.UUID) config.ServiceError
 		Unsubscribe(ctx context.Context, token uuid.UUID) config.ServiceError
 	}
+
+	mailer interface {
+		SendMail(to, subject, message string) config.ServiceError
+	}
 )
 
-func New(s subscriber) *handler {
-	return &handler{s}
+func New(s subscriber, mail mailer) *handler {
+	return &handler{s, mail}
 }
 
 func (h *handler) Init(r fiber.Router) {

@@ -1,6 +1,8 @@
 package subscriptionHandler
 
 import (
+	"fmt"
+
 	req "github.com/5aradise/gather-weather/internal/controllers/request"
 	res "github.com/5aradise/gather-weather/internal/controllers/response"
 	"github.com/gofiber/fiber/v3"
@@ -18,9 +20,12 @@ func (h *handler) subscribe(c fiber.Ctx) error {
 		return res.ServiceErr(c, serr)
 	}
 
-	return c.Status(fasthttp.StatusOK).JSON(map[string]any{
-		"token": token,
-	})
+	serr = h.mail.SendMail(sub.Email, "Gather-weather token", fmt.Sprintf("Your token: %s", token))
+	if !serr.IsZero() {
+		return res.ServiceErr(c, serr)
+	}
+
+	return c.SendStatus(fasthttp.StatusOK)
 }
 
 func (h *handler) confirm(c fiber.Ctx) error {

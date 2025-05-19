@@ -11,6 +11,7 @@ type (
 		WeatherApiKey string `envconfig:"WEATHERAPI_KEY" required:"true"`
 		DB            DB
 		Server        Server
+		Mail          Mail
 	}
 
 	DB struct {
@@ -23,6 +24,13 @@ type (
 
 	Server struct {
 		Port string `envconfig:"SERVER_PORT" required:"true"`
+	}
+
+	Mail struct {
+		Host     string `envconfig:"MAIL_HOST" required:"true"`
+		Port     string `envconfig:"MAIL_PORT" required:"true"`
+		Sender   string `envconfig:"MAIL_SENDER" required:"true"`
+		Password string `envconfig:"MAIL_PASSWORD" required:"true"`
 	}
 )
 
