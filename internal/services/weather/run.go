@@ -15,9 +15,9 @@ func (s *service) run() {
 	y, mon, d := nextReset.Date()
 	nextReset = time.Date(y, mon, d, nextReset.Hour(), nextReset.Minute(), 0, 0, nextReset.Location())
 	time.AfterFunc(nextReset.Sub(time.Now()), func() {
-		go s.currWeather.Reset()
+		go s.currWeather.Clear()
 		for range time.NewTicker(weatherUpdateDelayInMin * time.Minute).C {
-			s.currWeather.Reset()
+			s.currWeather.Clear()
 		}
 	})
 }

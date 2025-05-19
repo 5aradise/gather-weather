@@ -5,9 +5,13 @@ import (
 	"github.com/5aradise/gather-weather/config"
 
 	// handlers
+	subscriptionHandler "github.com/5aradise/gather-weather/internal/controllers/subscription"
 	weatherHandler "github.com/5aradise/gather-weather/internal/controllers/weather"
+	subscriptionStorage "github.com/5aradise/gather-weather/internal/storages/subscription"
 
 	// services
+	subscriptionService "github.com/5aradise/gather-weather/internal/services/subscriber"
+	validationServ "github.com/5aradise/gather-weather/internal/services/validator"
 	weatherService "github.com/5aradise/gather-weather/internal/services/weather"
 
 	// storages
@@ -62,14 +66,20 @@ func main() {
 		}
 	}()
 
+	// storages
+	subStor := subscriptionStorage.New(db.API())
+
 	// services
 	weatherSrv, err := weatherService.New(cfg.WeatherApiKey, sonic.Unmarshal)
 	if err != nil {
 		log.Fatal("can't init weather service: ", err)
 	}
+	validSrv := validationServ.New(weatherSrv.CheckCity)
+	subSrv := subscriptionService.New(subStor, validSrv)
 
 	// handlers
 	weatherH := weatherHandler.New(weatherSrv)
+	subH := subscriptionHandler.New(subSrv)
 
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,
@@ -85,6 +95,7 @@ func main() {
 	api := app.Group("/api")
 
 	weatherH.Init(api)
+	subH.Init(api)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)

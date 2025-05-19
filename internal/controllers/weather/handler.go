@@ -12,9 +12,9 @@ func (h *handler) getCurrentWeather(c fiber.Ctx) error {
 		return c.SendStatus(fasthttp.StatusBadRequest)
 	}
 
-	weather, err := h.srv.CurrentWeather(city)
-	if !err.IsZero() {
-		return c.SendStatus(err.ServiceCode.ToHttpStatus())
+	weather, serr := h.srv.CurrentWeather(city)
+	if !serr.IsZero() {
+		return res.ServiceErr(c, serr)
 	}
 
 	return c.Status(fasthttp.StatusOK).

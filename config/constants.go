@@ -7,8 +7,10 @@ import (
 )
 
 var ( // Errors
-	ErrCityNotFound = errors.New("City not found")
-	ErrTODO         = errors.New("TODO")
+	ErrCityNotFound    = errors.New("city not found")
+	ErrEmailSubscribed = errors.New("email already subscribed")
+	ErrTokenNotFound   = errors.New("token not found")
+	ErrTODO            = errors.New("TODO")
 )
 
 type ServiceCode int
