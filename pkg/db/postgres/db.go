@@ -30,7 +30,7 @@ func New(cfg Config) (*Database, error) {
 		logLvl = logger.Error
 	}
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name)
 
 	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
