@@ -6,10 +6,10 @@ import (
 )
 
 type Subscription struct {
-	Token     uuid.UUID
-	Email     string         `validate:"required,email"`
-	City      string         `validate:"required"`
-	Frequency frequency.Type `validate:"required"`
+	Token     uuid.UUID      `gorm:"type:uuid;primaryKey"`
+	Email     string         `gorm:"type:text;not null;uniqueIndex" validate:"required,email"`
+	City      string         `gorm:"type:text;not null" validate:"required"`
+	Frequency frequency.Type `gorm:"type:frequency_type;not null" validate:"required"`
 }
 
 type SubShort struct {

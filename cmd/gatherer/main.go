@@ -19,8 +19,6 @@ import (
 	// storages
 	"github.com/5aradise/gather-weather/pkg/db/postgres"
 
-	"github.com/pressly/goose/v3"
-
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -72,16 +70,7 @@ func main() {
 		}
 	}()
 
-	sqlDB, err := db.API().DB()
-	if err != nil {
-		log.Fatal("can't get sql db: ", err)
-	}
-
-	goose.SetBaseFS(root.Migrations)
-	if err := goose.SetDialect("postgres"); err != nil {
-		log.Fatal("can't set goose dialect: ", err)
-	}
-	if err := goose.Up(sqlDB, "sql/schema"); err != nil {
+	if err := postgres.Migrate(db.API()); err != nil {
 		log.Fatal("can't migrate db: ", err)
 	}
 
