@@ -15,11 +15,13 @@ type (
 	}
 
 	DB struct {
-		Address  string `envconfig:"DB_HOST" required:"true"`
-		Port     string `envconfig:"DB_PORT" required:"true"`
-		Name     string `envconfig:"DB_NAME" required:"true"`
-		User     string `envconfig:"DB_USER" required:"true"`
-		Password string `envconfig:"DB_PASSWORD" required:"true"`
+		// Address  string `envconfig:"DB_HOST" required:"true"`
+		// Port     string `envconfig:"DB_PORT" required:"true"`
+		// Name     string `envconfig:"DB_NAME" required:"true"`
+		// User     string `envconfig:"DB_USER" required:"true"`
+		// Password string `envconfig:"DB_PASSWORD" required:"true"`
+
+		DSN string `envconfig:"DB_DSN" required:"false"`
 	}
 
 	Server struct {

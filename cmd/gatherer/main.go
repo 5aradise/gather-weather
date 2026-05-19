@@ -2,6 +2,7 @@ package main
 
 import (
 	// config
+
 	root "github.com/5aradise/gather-weather"
 	"github.com/5aradise/gather-weather/config"
 
@@ -55,11 +56,13 @@ func main() {
 	db, err := postgres.New(postgres.Config{
 		Env: cfg.Env,
 
-		Host:     cfg.DB.Address,
-		User:     cfg.DB.User,
-		Password: cfg.DB.Password,
-		Port:     cfg.DB.Port,
-		Name:     cfg.DB.Name,
+		// Host:     cfg.DB.Address,
+		// User:     cfg.DB.User,
+		// Password: cfg.DB.Password,
+		// Port:     cfg.DB.Port,
+		// Name:     cfg.DB.Name,
+
+		DSN: cfg.DB.DSN,
 	})
 	if err != nil {
 		log.Fatal("can't init db: ", err)
