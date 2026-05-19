@@ -22,6 +22,8 @@ type (
 		ConfirmSubscription(ctx context.Context, token uuid.UUID) config.ServiceError
 		Unsubscribe(ctx context.Context, token uuid.UUID) config.ServiceError
 
+		ListSubscribers(ctx context.Context) ([]model.Subscription, config.ServiceError)
+
 		ListHourlySubscribers() iter.Seq[model.SubShort]
 		ListDailySubscribers() iter.Seq[model.SubShort]
 	}
@@ -43,4 +45,7 @@ func (h *handler) Init(r fiber.Router) {
 	r.Post("/subscribe", h.subscribe)
 	r.Get("/confirm/:token", h.confirm)
 	r.Get("/unsubscribe/:token", h.unsubscribe)
+
+	r.Get("/subscriptions", h.listSubscriptions)
+	r.Post("/subscriptions", h.createSubscriptions)
 }

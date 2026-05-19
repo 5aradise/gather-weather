@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gather Weather</title>
+    <link rel="stylesheet" href="public/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>Gather Weather</h1>
+      </header>
+
+      <section class="card">
+        <h2>Subscribe</h2>
+        <form id="subscribe-form">
+          <label
+            >Email<input
+              type="email"
+              name="email"
+              required
+              placeholder="you@example.com"
+          /></label>
+          <label
+            >City<input type="text" name="city" required placeholder="London"
+          /></label>
+          <label
+            >Frequency
+            <select name="frequency">
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+            </select>
+          </label>
+          <div class="buttons">
+            <button type="button" id="create-btn">Subscribe immediately</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card split">
+        <div>
+          <h2>Subscriptions</h2>
+          <button id="list-btn">Load subscriptions</button>
+          <pre id="subscriptions-output">No subscriptions loaded yet.</pre>
+        </div>
+        <div>
+          <h2>Weather</h2>
+          <form id="weather-form">
+            <label
+              >City<input
+                type="text"
+                id="weather-city"
+                required
+                placeholder="Paris"
+            /></label>
+            <button type="button" id="weather-btn">Fetch weather</button>
+          </form>
+          <pre id="weather-output">No weather data yet.</pre>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Status</h2>
+        <div id="status" class="status">Ready.</div>
+      </section>
+    </div>
+
+    <script src="public/app.js"></script>
+  </body>
+</html>

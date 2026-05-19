@@ -95,6 +95,15 @@ func (s *service) Unsubscribe(ctx context.Context, token uuid.UUID) config.Servi
 	return config.ServiceError{}
 }
 
+func (s *service) ListSubscribers(ctx context.Context) ([]model.Subscription, config.ServiceError) {
+	subs, err := s.stor.ListAllSubscriptions(ctx)
+	if err != nil {
+		return nil, config.NewUnknownErr(err)
+	}
+
+	return subs, config.ServiceError{}
+}
+
 func (s *service) ListHourlySubscribers() iter.Seq[model.SubShort] {
 	return func(yield func(model.SubShort) bool) {
 		s.subs.mu.Lock()

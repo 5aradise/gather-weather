@@ -28,6 +28,33 @@ func (h *handler) subscribe(c fiber.Ctx) error {
 	return c.SendStatus(fasthttp.StatusOK)
 }
 
+func (h *handler) createSubscriptions(c fiber.Ctx) error {
+	sub, err := req.SubscriptionFromForm(c)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	token, serr := h.sub.RequestSubscription(c.Context(), sub)
+	if !serr.IsZero() {
+		return res.ServiceErr(c, serr)
+	}
+	serr = h.sub.ConfirmSubscription(c.Context(), token)
+	if !serr.IsZero() {
+		return res.ServiceErr(c, serr)
+	}
+
+	return c.SendStatus(fasthttp.StatusOK)
+}
+
+func (h *handler) listSubscriptions(c fiber.Ctx) error {
+	subs, serr := h.sub.ListSubscribers(c.Context())
+	if !serr.IsZero() {
+		return res.ServiceErr(c, serr)
+	}
+
+	return c.Status(fasthttp.StatusOK).JSON(subs)
+}
+
 func (h *handler) confirm(c fiber.Ctx) error {
 	strToken := c.Params("token")
 	if strToken == "" {

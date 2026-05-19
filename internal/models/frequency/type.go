@@ -19,7 +19,7 @@ func New(s string) (Type, error) {
 	case "daily":
 		return Daily, nil
 	default:
-		return Type(""), errors.New("frequency: unknown duration")
+		return "", errors.New("frequency: unknown duration")
 	}
 }
 

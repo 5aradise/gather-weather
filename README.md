@@ -2,13 +2,13 @@
 
 ## Requirements
 
-- Go 1.24.1+
+- Go 1.26.1+
 - Docker
 - GNU utils (make)
 
 ## Local development
 
-Make sure you're on Go version 1.24.1+.
+Make sure you're on Go version 1.26.1+.
 
 Rename `.example.env` to `.env` and change environment variables you want.
 

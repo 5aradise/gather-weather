@@ -2,6 +2,7 @@ package main
 
 import (
 	// config
+	root "github.com/5aradise/gather-weather"
 	"github.com/5aradise/gather-weather/config"
 
 	// handlers
@@ -18,17 +19,21 @@ import (
 	// storages
 	"github.com/5aradise/gather-weather/pkg/db/postgres"
 
+	"github.com/pressly/goose/v3"
+
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/recover"
+	"github.com/gofiber/fiber/v3/middleware/static"
 
 	"flag"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -67,6 +72,17 @@ func main() {
 		}
 	}()
 
+	sqlDB, err := db.API().DB()
+	if err != nil {
+		log.Fatal("can't get sql db: ", err)
+	}
+
+	goose.SetBaseFS(root.Migrations)
+	if err := goose.SetDialect("postgres"); err != nil {
+		log.Fatal("can't set goose dialect: ", err)
+	}
+	goose.Up(sqlDB, "sql/schema")
+
 	// storages
 	subStor := subscriptionStorage.New(db.API())
 
@@ -97,18 +113,27 @@ func main() {
 	}))
 	app.Use(logger.New())
 
+	app.Use(static.New("", static.Config{
+		FS:         root.Public,
+		IndexNames: []string{"public/index.html"},
+		Next: func(c fiber.Ctx) bool {
+			return strings.HasPrefix(c.Path(), "/api")
+		},
+	}))
+
 	api := app.Group("/api")
 
 	weatherH.Init(api)
 	subH.Init(api)
 
-	subH.RunMailing()
+	// subH.RunMailing()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	serverErr := make(chan error)
 	go func() {
+		log.Printf("server is running on port %s\n", cfg.Server.Port)
 		serverErr <- app.Listen(net.JoinHostPort("", cfg.Server.Port))
 	}()
 

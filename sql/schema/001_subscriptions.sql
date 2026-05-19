@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TYPE frequency_type AS ENUM ('hourly', 'daily');
 
 CREATE TABLE subscriptions (
@@ -6,3 +7,7 @@ CREATE TABLE subscriptions (
     city TEXT NOT NULL,
     frequency frequency_type NOT NULL
 );
+
+-- +goose Down
+DROP TABLE IF EXISTS subscriptions;
+DROP TYPE IF EXISTS frequency_type;

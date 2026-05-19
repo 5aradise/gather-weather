@@ -6,5 +6,5 @@ import (
 )
 
 func ServiceErr(c fiber.Ctx, serr config.ServiceError) error {
-	return c.SendStatus(serr.ServiceCode.ToHttpStatus())
+	return c.Status(serr.ServiceCode.ToHttpStatus()).SendString(serr.Error())
 }

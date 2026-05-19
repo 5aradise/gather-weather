@@ -13,7 +13,7 @@ func (s service) ValidateSubscription(sub model.Subscription) error {
 	}
 
 	if !s.checkCity(sub.City) {
-		return errors.New("")
+		return errors.New("city is not valid")
 	}
 	return nil
 }

@@ -1,15 +1,21 @@
-FROM golang:1.24.3-alpine AS builder
+FROM golang:1.26.3-alpine AS builder
 
-WORKDIR /go/src/app
+WORKDIR /src
 
-COPY . .
-
+COPY go.mod go.sum ./
 RUN go mod download
 
-RUN go build -C cmd/gatherer/ -ldflags="-w -s" -o /go/bin/
+COPY . .
+RUN GOOS=linux go build -C cmd/gatherer/ -o /out/gatherer
 
-FROM alpine
+FROM alpine:latest
 
-COPY --from=builder /go/bin/gatherer /go/bin/app
+RUN apk add --no-cache ca-certificates tzdata postgresql17-client
 
-CMD ["/go/bin/app"]
+WORKDIR /app
+
+COPY --from=builder /out/gatherer /app/gatherer
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app/gatherer"]
