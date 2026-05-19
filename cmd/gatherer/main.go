@@ -81,7 +81,9 @@ func main() {
 	if err := goose.SetDialect("postgres"); err != nil {
 		log.Fatal("can't set goose dialect: ", err)
 	}
-	goose.Up(sqlDB, "sql/schema")
+	if err := goose.Up(sqlDB, "sql/schema"); err != nil {
+		log.Fatal("can't migrate db: ", err)
+	}
 
 	// storages
 	subStor := subscriptionStorage.New(db.API())
