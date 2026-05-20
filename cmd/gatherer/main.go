@@ -2,6 +2,8 @@ package main
 
 import (
 	// config
+	"net/http"
+
 	root "github.com/5aradise/gather-weather"
 	"github.com/5aradise/gather-weather/config"
 
@@ -19,12 +21,13 @@ import (
 	// storages
 	"github.com/5aradise/gather-weather/pkg/db/postgres"
 
+	"github.com/ansrivas/fiberprometheus/v2"
 	"github.com/bytedance/sonic"
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/logger"
-	"github.com/gofiber/fiber/v3/middleware/recover"
-	"github.com/gofiber/fiber/v3/middleware/static"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"flag"
 	"log"
@@ -99,16 +102,24 @@ func main() {
 	})
 	app.Use(recover.New())
 	app.Use(cors.New(cors.Config{
-		AllowMethods:  []string{fiber.MethodGet, fiber.MethodPost, fiber.MethodOptions, fiber.MethodPut, fiber.MethodDelete},
-		ExposeHeaders: []string{"Link"},
+		AllowMethods:  strings.Join([]string{fiber.MethodGet, fiber.MethodPost, fiber.MethodOptions, fiber.MethodPut, fiber.MethodDelete}, ","),
+		ExposeHeaders: "Link",
 	}))
 	app.Use(logger.New())
 
-	app.Use(static.New("", static.Config{
-		FS:         root.Public,
-		IndexNames: []string{"public/index.html"},
-		Next: func(c fiber.Ctx) bool {
-			return strings.HasPrefix(c.Path(), "/api")
+	prometheus := fiberprometheus.New("gather-weather-service")
+	prometheus.RegisterAt(app, "/metrics")
+
+	app.Use(filesystem.New(filesystem.Config{
+		// Передаємо вбудовану систему, загорнуту в http.FS
+		Root: http.FS(root.Public),
+
+		// Вказуємо шлях до головного файлу всередині твоєї embed-папки
+		Index: "public/index.html",
+
+		// Логіка пропуску API-запитів (Next) у v2 працює точно так само
+		Next: func(c *fiber.Ctx) bool {
+			return strings.HasPrefix(c.Path(), "/api") || strings.HasPrefix(c.Path(), "/metrics")
 		},
 	}))
 

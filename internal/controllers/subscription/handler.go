@@ -5,12 +5,12 @@ import (
 
 	req "github.com/5aradise/gather-weather/internal/controllers/request"
 	res "github.com/5aradise/gather-weather/internal/controllers/response"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/valyala/fasthttp"
 )
 
-func (h *handler) subscribe(c fiber.Ctx) error {
+func (h *handler) subscribe(c *fiber.Ctx) error {
 	sub, err := req.SubscriptionFromForm(c)
 	if err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -28,7 +28,7 @@ func (h *handler) subscribe(c fiber.Ctx) error {
 	return c.SendStatus(fasthttp.StatusOK)
 }
 
-func (h *handler) createSubscriptions(c fiber.Ctx) error {
+func (h *handler) createSubscriptions(c *fiber.Ctx) error {
 	sub, err := req.SubscriptionFromForm(c)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
@@ -46,7 +46,7 @@ func (h *handler) createSubscriptions(c fiber.Ctx) error {
 	return c.SendStatus(fasthttp.StatusOK)
 }
 
-func (h *handler) listSubscriptions(c fiber.Ctx) error {
+func (h *handler) listSubscriptions(c *fiber.Ctx) error {
 	subs, serr := h.sub.ListSubscribers(c.Context())
 	if !serr.IsZero() {
 		return res.ServiceErr(c, serr)
@@ -55,7 +55,7 @@ func (h *handler) listSubscriptions(c fiber.Ctx) error {
 	return c.Status(fasthttp.StatusOK).JSON(subs)
 }
 
-func (h *handler) confirm(c fiber.Ctx) error {
+func (h *handler) confirm(c *fiber.Ctx) error {
 	strToken := c.Params("token")
 	if strToken == "" {
 		panic("emrty token parameter")
@@ -74,7 +74,7 @@ func (h *handler) confirm(c fiber.Ctx) error {
 	return c.SendStatus(fasthttp.StatusOK)
 }
 
-func (h *handler) unsubscribe(c fiber.Ctx) error {
+func (h *handler) unsubscribe(c *fiber.Ctx) error {
 	strToken := c.Params("token")
 	if strToken == "" {
 		panic("emrty token parameter")

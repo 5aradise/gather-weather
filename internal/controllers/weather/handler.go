@@ -2,11 +2,11 @@ package weatherHandler
 
 import (
 	res "github.com/5aradise/gather-weather/internal/controllers/response"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 	"github.com/valyala/fasthttp"
 )
 
-func (h *handler) getCurrentWeather(c fiber.Ctx) error {
+func (h *handler) getCurrentWeather(c *fiber.Ctx) error {
 	city := c.Query("city")
 	if city == "" {
 		return c.SendStatus(fasthttp.StatusBadRequest)

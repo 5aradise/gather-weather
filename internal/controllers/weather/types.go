@@ -3,7 +3,7 @@ package weatherHandler
 import (
 	"github.com/5aradise/gather-weather/config"
 	model "github.com/5aradise/gather-weather/internal/models"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 type (
