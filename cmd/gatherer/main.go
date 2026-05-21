@@ -100,6 +100,11 @@ func main() {
 		JSONEncoder: sonic.Marshal,
 		JSONDecoder: sonic.Unmarshal,
 	})
+
+	prometheus := fiberprometheus.New("my-service-name")
+	prometheus.RegisterAt(app, "/metrics")
+	app.Use(prometheus.Middleware)
+
 	app.Use(recover.New())
 	app.Use(cors.New(cors.Config{
 		AllowMethods:  strings.Join([]string{fiber.MethodGet, fiber.MethodPost, fiber.MethodOptions, fiber.MethodPut, fiber.MethodDelete}, ","),
@@ -107,17 +112,11 @@ func main() {
 	}))
 	app.Use(logger.New())
 
-	prometheus := fiberprometheus.New("gather-weather-service")
-	prometheus.RegisterAt(app, "/metrics")
-
 	app.Use(filesystem.New(filesystem.Config{
-		// Передаємо вбудовану систему, загорнуту в http.FS
 		Root: http.FS(root.Public),
 
-		// Вказуємо шлях до головного файлу всередині твоєї embed-папки
 		Index: "public/index.html",
 
-		// Логіка пропуску API-запитів (Next) у v2 працює точно так само
 		Next: func(c *fiber.Ctx) bool {
 			return strings.HasPrefix(c.Path(), "/api") || strings.HasPrefix(c.Path(), "/metrics")
 		},

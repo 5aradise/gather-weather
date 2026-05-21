@@ -1,47 +1,53 @@
 services:
-  db:
+  postgres-db:
     image: postgres:17.5
+    container_name: local-postgres-compose
+    restart: always
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - gatherer-data:/var/lib/postgresql/data
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: weather_db
     ports:
-      - ${DB_PORT}:5432
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
-    restart: unless-stopped
+    networks:
+      - backend
 
-  app:
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      ENV: ${ENV}
-
-      SERVER_PORT: ${SERVER_PORT}
-
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      MAIL_SENDER: ${MAIL_SENDER}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-
-      WEATHERAPI_KEY: ${WEATHERAPI_KEY}
+  gather-weather-backend:
+    image: 5aradise/gather-weather-backend:latest
+    container_name: com-backend
+    restart: always
     ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
+      - '8080:8080'
+    environment:
+      ENV: dev
+
+      SERVER_PORT: 8080
+
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: weather_db
+
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_SENDER: paradjzer@gmail.com
+      MAIL_PASSWORD: bgiq vbvm swba rlfo
+
+      WEATHERAPI_KEY: 028373183a7443b39c1170026251805
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - backend
 
   prometheus:
     image: prom/prometheus:latest
@@ -64,4 +70,7 @@ services:
       - backend
 
 volumes:
-  gatherer-data:
+  postgres_data:
+
+networks:
+  backend:
